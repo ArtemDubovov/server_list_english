@@ -37,12 +37,12 @@ class WordController {
 
   async updateWord(req, res, next) {
     try {
-      const { id, userId, translation, word } = req.body;
-      console.log(id, userId, translation, word);
+      const { id, userId, translation, word, count } = req.body;
+      console.log(id, userId, translation, word, count);
       if (!id || !userId) {
         return next(ApiError.badRequest('Не указаны ID слова или пользователя.'));
       }
-      if (word && translation) {
+      if (word && translation && !Number.isInteger(count)) {
         console.log('Word and transl');
         const result = await Words.update({ word, translation },{ where: {userId, id}});
         res.json(result);
@@ -52,10 +52,14 @@ class WordController {
         res.json(result);
       } else if (word && !translation) {
         console.log('only word');
-        await Words.update({ word }, {where: {userId, id}});
+         await Words.update({ word }, {where: {userId, id}});
+        res.json({message: 'Словоs изменено.'});
+      }  else if (Number.isInteger(count)) {
+        console.log('Count update', count, userId, id);
+        const r = await Words.update({ count }, {where: {userId, id}});
+        console.log(r, ' result update ccount');
         res.json({message: 'Словоs изменено.'});
       }
-
     } catch (e) {
       console.log(e);
     }
